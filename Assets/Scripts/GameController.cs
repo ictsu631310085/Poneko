@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameController : MonoBehaviour
 {
@@ -10,15 +11,18 @@ public class GameController : MonoBehaviour
     public GameObject[] windows;
     public Vector2 dayHourRange;
 
+    public GameObject[] cats;
+
     public GameObject[] preloads;
 
-    public GameObject quitPanel;
+    [field: SerializeField]
+    private GameObject _gameOverPanel;
 
     //
-    [field: SerializeField]
-    public float AwaySeconds { get; private set; }
+    private DateTime _lastPlayedTime;
+    public float awaySeconds;
 
-    private DateTime _LastPlayedTime { get; set; }
+    public int chosenCat;
 
     void Awake()
     {
@@ -35,13 +39,13 @@ public class GameController : MonoBehaviour
         if (PlayerPrefs.HasKey("savedTime"))
         {
             string timeAsString = PlayerPrefs.GetString("savedTime");
-            _LastPlayedTime = DateTime.Parse(timeAsString);
+            _lastPlayedTime = DateTime.Parse(timeAsString);
 
-            Debug.Log("LastPlayedTime: " + _LastPlayedTime);
+            Debug.Log("LastPlayedTime: " + _lastPlayedTime);
 
-            TimeSpan awayTime = timeNow - _LastPlayedTime;
+            TimeSpan awayTime = timeNow - _lastPlayedTime;
 
-            AwaySeconds = (float) awayTime.TotalSeconds;
+            awaySeconds = (float) awayTime.TotalSeconds;
         }
 
         // Spawn Window
@@ -54,25 +58,13 @@ public class GameController : MonoBehaviour
             Instantiate(windows[1]);
         }
 
+        // Spawn Cat
+        Instantiate(cats[chosenCat]);
+
         // Enable Preloads
         foreach (GameObject item in preloads)
         {
             item.SetActive(true);
-        }
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (Input.GetKey(KeyCode.Escape))
-        {
-            quitPanel.SetActive(true);
         }
     }
 
@@ -108,5 +100,18 @@ public class GameController : MonoBehaviour
     public void QuitButton()
     {
         Application.Quit();
+    }
+
+    public void GameOver()
+    {
+        Time.timeScale = 0f;
+        _gameOverPanel.SetActive(true);
+        PlayerPrefs.DeleteAll();
+    }
+
+    public void RetryButon()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }

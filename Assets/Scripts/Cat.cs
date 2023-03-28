@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Cat : MonoBehaviour
 {
@@ -8,12 +9,9 @@ public class Cat : MonoBehaviour
     public float healthDropRate;
 
     public float healthFromPetting;
-    [Range(0f, 1f)]
-    public float angryFromPetting;
 
     public float angryHealthDrop;
-
-    public Vector2 angryPettingSeconds;
+    public float sickHealthDropRate;
 
     [field: SerializeField]
     public Vector2 SleepDurationRange { get; private set; }
@@ -28,20 +26,44 @@ public class Cat : MonoBehaviour
     public Vector2 EatDurationRange { get; private set; }
 
     [field: SerializeField]
+    public Vector2 WaitDurationRange { get; private set; }
+
+    //
+    public float idleChance;
+
+    public float walkChance;
+    public Vector2 boundaryX;
+    public Vector2 boundaryY;
+
+    public float angryChance;
+    public Vector2 angryDurationRange;
+
+    public float sickChanceFactor;
+
+    //
+    [field: SerializeField]
     public float CurrentHealth { get; private set; }
 
     [field: SerializeField]
     public float CurrentHunger { get; private set; }
 
-    private float loadedHealth;
-    private float loadedHunger;
-    private bool isDataLoaded;
+    public float sickChance;
+    public bool isSick;
 
-    // HideInInspector
-    [HideInInspector]
-    public Draggable draggable;
+    public Slider HealthBar { get; set; }
+    public Slider HungerBar { get; set; }
 
     public GameObject target;
+
+    // load
+    private float loadedHealth;
+    private float loadedHunger;
+    private string loadedIsSick;
+    private bool isDataLoaded;
+
+    //
+    [HideInInspector]
+    public Draggable draggable;
 
     // Start is called before the first frame update
     void Start()
@@ -53,14 +75,17 @@ public class Cat : MonoBehaviour
         draggable = GetComponent<Draggable>();
 
         loadedHealth = PlayerPrefs.GetFloat("Health", maxHealth);
-        float awayHealthDecrease = (GameController.Instance.AwaySeconds * healthDropRate);
+        float awayHealthDecrease = (GameController.Instance.awaySeconds * healthDropRate);
         float initHealth = loadedHealth - awayHealthDecrease;
-        UpdateHealth(initHealth);
+        InitializeHealth(initHealth);
 
         loadedHunger = PlayerPrefs.GetFloat("Hunger", maxHunger);
-        float awayHungerDecrease = (GameController.Instance.AwaySeconds * hungerRate);
+        float awayHungerDecrease = (GameController.Instance.awaySeconds * hungerRate);
         float initHunger = loadedHunger - awayHungerDecrease;
-        UpdateHunger(initHunger);
+        InitializeHunger(initHunger);
+
+        loadedIsSick = PlayerPrefs.GetString("isSick", "False");
+        isSick = loadedIsSick == "True";
 
         isDataLoaded = true;
     }
@@ -70,13 +95,22 @@ public class Cat : MonoBehaviour
     {
         if (CurrentHealth > 0.0f)
         {
-            UpdateHealth(-healthDropRate * Time.deltaTime);
+            if (!isSick)
+            {
+                UpdateHealth(-healthDropRate * Time.deltaTime);
+            }
+            else
+            {
+                UpdateHealth(-sickHealthDropRate * Time.deltaTime);
+            }
         }
 
         if (CurrentHunger > 0.0f)
         {
             UpdateHunger(-hungerRate * Time.deltaTime);
         }
+
+        sickChance = (1f - (CurrentHealth / maxHealth)) * sickChanceFactor;
     }
 
     void OnApplicationPause()
@@ -100,25 +134,53 @@ public class Cat : MonoBehaviour
         SaveData();
     }
 
+    private void InitializeHunger(float amount)
+    {
+        CurrentHunger = amount;
+        CurrentHunger = Mathf.Clamp(CurrentHunger, 0.0f, maxHunger);
+    }
+
     public void UpdateHunger(float amount)
     {
         CurrentHunger += amount;
         CurrentHunger = Mathf.Clamp(CurrentHunger, 0.0f, maxHunger);
+
+        if (HungerBar)
+        {
+            HungerBar.value = CurrentHunger;
+        }
+    }
+
+    private void InitializeHealth(float amount)
+    {
+        CurrentHealth = amount;
+        CurrentHealth = Mathf.Clamp(CurrentHealth, 0.0f, maxHealth);
     }
 
     public void UpdateHealth(float amount)
     {
         CurrentHealth += amount;
         CurrentHealth = Mathf.Clamp(CurrentHealth, 0.0f, maxHealth);
+
+        if (HealthBar)
+        {
+            HealthBar.value = CurrentHealth;
+        }
+
+        if (CurrentHealth == 0f && GameController.Instance)
+        {
+            GameController.Instance.GameOver();
+        }
     }
 
     public void SaveData()
     {
 #if UNITY_EDITOR
-        Debug.Log("CurrentHealth: " + CurrentHealth + "   CurrentHunger: " + CurrentHunger);
+        Debug.Log("CurrentHealth: " + CurrentHealth + "   CurrentHunger: " + CurrentHunger + "    isSick: " + isSick);
 #endif
         
         PlayerPrefs.SetFloat("Health", CurrentHealth);
         PlayerPrefs.SetFloat("Hunger", CurrentHunger);
+        PlayerPrefs.SetString("isSick", isSick.ToString());
     }
 }

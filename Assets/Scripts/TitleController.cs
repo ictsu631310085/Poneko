@@ -44,4 +44,9 @@ public class TitleController : MonoBehaviour
     {
         PlayerPrefs.DeleteAll();
     }
+
+    public void SetDebug(bool value)
+    {
+        _isDebug = value;
+    }
 }

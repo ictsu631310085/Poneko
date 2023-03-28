@@ -267,7 +267,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7419280253440472652}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -4, z: 0}
   m_LocalScale: {x: 0.3, y: 0.3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -290,18 +290,27 @@ MonoBehaviour:
   maxHealth: 100
   healthDropRate: 0.001
   healthFromPetting: 1
-  angryFromPetting: 0.1
   angryHealthDrop: 5
-  angryPettingSeconds: {x: 0.5, y: 3}
+  sickHealthDropRate: 1
   <SleepDurationRange>k__BackingField: {x: 10, y: 30}
   maxHunger: 100
   hungerRate: 0.002
   eatThreshold: 0.8
   <EatDurationRange>k__BackingField: {x: 10, y: 30}
+  <WaitDurationRange>k__BackingField: {x: 1, y: 5}
+  idleChance: 0.75
+  walkChance: 0.5
+  boundaryX: {x: -1.5, y: 1.5}
+  boundaryY: {x: -5, y: -3}
+  angryChance: 0.2
+  angryDurationRange: {x: 0.5, y: 3}
+  sickChanceFactor: 0.5
   <CurrentHealth>k__BackingField: 0
   <CurrentHunger>k__BackingField: 0
-  draggable: {fileID: 0}
+  sickChance: 0
+  isSick: 0
   target: {fileID: 0}
+  draggable: {fileID: 0}
 --- !u!212 &2308883229054904973
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -486,3 +495,4 @@ MonoBehaviour:
   scaleWith: 1
   scaleFactor: 0.3
   destroyAfterStart: 1
+  destroyRenderer: 0

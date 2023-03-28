@@ -18,6 +18,7 @@ public class ScaleSpriteWithScreen : MonoBehaviour
     public float scaleFactor;
 
     public bool destroyAfterStart;
+    public bool destroyRenderer;
 
     private SpriteRenderer _spriteRenderer;
 
@@ -33,6 +34,14 @@ public class ScaleSpriteWithScreen : MonoBehaviour
         if (destroyAfterStart)
         {
             Destroy(this);
+        }
+    }
+
+    void OnDestroy()
+    {
+        if (destroyRenderer)
+        {
+            Destroy(_spriteRenderer);
         }
     }
 

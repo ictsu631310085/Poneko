@@ -102,6 +102,12 @@ public class DebugController : MonoBehaviour
             _cat.UpdateHunger(-_cat.maxHunger);
         }
         #endregion
+
+        // Cure Sick Button
+        if (GUI.Button(new Rect(0f, Screen.height * 0.31f, Screen.width * 0.2f, Screen.height * 0.05f), "Cure"))
+        {
+            _cat.isSick = false;
+        }
     }
 
     public void ToggleDebug()

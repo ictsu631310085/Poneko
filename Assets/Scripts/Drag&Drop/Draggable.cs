@@ -47,6 +47,8 @@ public class Draggable : MonoBehaviour
                         deltaY = touchPos.y - transform.position.y;
 
                         isPickUp = true;
+
+                        SetOtherDraggablesPickable(false);
                     }
                     break;
 
@@ -67,6 +69,11 @@ public class Draggable : MonoBehaviour
                     break;
 
                 case TouchPhase.Ended:
+                    if (!isPickUp)
+                    {
+                        return;
+                    }
+
                     if (!dropPlace)
                     {
                         transform.position = new Vector2(initialPosition.x, initialPosition.y);
@@ -79,7 +86,21 @@ public class Draggable : MonoBehaviour
 
                     isPickUp = false;
                     isMoving = false;
+
+                    SetOtherDraggablesPickable(true);
                     break;
+            }
+        }
+    }
+
+    private void SetOtherDraggablesPickable(bool value)
+    {
+        Draggable[] draggables = FindObjectsOfType<Draggable>();
+        foreach (var item in draggables)
+        {
+            if (item != this)
+            {
+                item.isPickable = value;
             }
         }
     }
